@@ -113,7 +113,7 @@ Open `dashboard/sales_dashboard.pbix` in Power BI Desktop and connect to your Po
 ## 👤 Author
 
 **Omar Sharafeldin Mohamed Abdelfatah**  
-[GitHub](https://github.com/OmarSharafeldin) · [LinkedIn](https://linkedin.com/in/omarsharafeldin)
+[GitHub](https://github.com/OmarSharaf) · [LinkedIn](https://linkedin.com/in/omarsharafaldin)
 
 ---
 

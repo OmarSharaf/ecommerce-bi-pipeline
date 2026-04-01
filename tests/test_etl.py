@@ -2,6 +2,7 @@ import pytest
 import pandas as pd
 import sys
 import os
+from unittest.mock import patch, MagicMock
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'etl'))
 
@@ -9,30 +10,53 @@ from extract import get_products, get_orders, get_customers
 from transform import transform_orders, transform_customers, transform_exchange_rates
 
 
+# ─── Mock Data ────────────────────────────────────────────────
+
+MOCK_PRODUCTS = [
+    {"id": 1, "title": "Product A", "price": 100.0, "category": "electronics", "description": "", "image": ""},
+    {"id": 2, "title": "Product B", "price": 50.0,  "category": "jewelery",    "description": "", "image": ""},
+    {"id": 3, "title": "Product C", "price": 75.0,  "category": "men's clothing", "description": "", "image": ""},
+]
+
+
+def mock_get(*args, **kwargs):
+    """Mock requests.get to return fake product data."""
+    mock_resp = MagicMock()
+    mock_resp.status_code = 200
+    mock_resp.json.return_value = MOCK_PRODUCTS
+    mock_resp.raise_for_status = MagicMock()
+    return mock_resp
+
+
 # ─── Extract Tests ────────────────────────────────────────────
 
 class TestExtract:
 
-    def test_get_products_returns_dataframe(self):
+    @patch("extract.requests.get", side_effect=mock_get)
+    def test_get_products_returns_dataframe(self, _):
         df = get_products()
         assert isinstance(df, pd.DataFrame)
-        assert len(df) > 0
+        assert len(df) == 3
 
-    def test_get_products_has_required_columns(self):
+    @patch("extract.requests.get", side_effect=mock_get)
+    def test_get_products_has_required_columns(self, _):
         df = get_products()
         for col in ["id", "title", "price", "category"]:
             assert col in df.columns
 
-    def test_get_orders_returns_correct_count(self):
+    @patch("extract.requests.get", side_effect=mock_get)
+    def test_get_orders_returns_correct_count(self, _):
         df = get_orders(10)
         assert len(df) == 10
 
-    def test_get_orders_has_required_columns(self):
+    @patch("extract.requests.get", side_effect=mock_get)
+    def test_get_orders_has_required_columns(self, _):
         df = get_orders(5)
         for col in ["order_id", "product_id", "price", "quantity", "customer_id", "order_date", "region", "status"]:
             assert col in df.columns
 
-    def test_get_orders_status_values(self):
+    @patch("extract.requests.get", side_effect=mock_get)
+    def test_get_orders_status_values(self, _):
         df = get_orders(50)
         valid = {"Completed", "Pending", "Returned"}
         assert set(df["status"].unique()).issubset(valid)
